@@ -1,16 +1,27 @@
 #!/usr/bin/node
-const request = require('request');
-const movieID = process.argv[2];
-const url = 'https://swapi-api.hbtn.io/api/films/' + movieID;
+// send a request to star wars api
 
-request(url, (error, response, body) => {
-  if (error) { console.log(error); }
-  const result = JSON.parse(body);
-  for (const charURL of result.characters) {
-    request(charURL, (err, r, body) => {
-      if (err) { console.log(err); }
-      const result = JSON.parse(body);
-      console.log(result.name);
-    });
+const request = require('request');
+const url = 'https://swapi-api.hbtn.io/api/films/';
+request(url + process.argv[2], function (error, response, body) {
+  if (error) {
+    console.log(error);
+  } else if (response.statusCode === 200) {
+    const film = JSON.parse(body);
+
+    let actors;
+    let char;
+    for (char in film.characters) {
+      actors = film.characters;
+      request(actors[char], function (err, resp, bdy) {
+        if (err) {
+          console.log(err);
+        } else if (resp.statusCode === 200) {
+          const actor = JSON.parse(bdy);
+
+          console.log(actor.name);
+        }
+      });
+    }
   }
 });
